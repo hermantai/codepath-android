@@ -18,12 +18,17 @@ The following **required** functionality is completed:
   list.
 * [x] User can **persist todo items** and retrieve them properly on app restart
 
+The following optional features are implemented:
+
+* [x] Persist the todo items into SQLite instead of a text file
+* [x] Filter the todo items by a search query
+
 # Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
 
 ![video walkthrough for the required functionalities
-completed](simpletodo-with-created-time.gif)
+completed](simpletodo-with-search.gif)
 
 GIF created with LiceCap.
 

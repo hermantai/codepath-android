@@ -3,7 +3,11 @@ package com.htaihm.simpletodo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,6 +21,7 @@ import com.htaihm.simpletodo.repo.TodosDatabaseHelper;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     public static final String EDIT_EXTRA_TEXT = "item_text";
@@ -29,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<TodoItem> itemsAdapter;
     private ListView lvItems;
     private TodosDatabaseHelper todosDatabaseHelper;
+
+    // Store the last query from Search
+    private String lastQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +51,39 @@ public class MainActivity extends AppCompatActivity {
                 android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemsAdapter);
         setupListViewListener();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.todos_search_menu, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.menu_item_search);
+        final SearchView searchView = (SearchView) searchItem.getActionView();
+
+        searchView.setOnQueryTextListener(
+                new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        lastQuery = newText;
+                        updateItemsWithQuery(newText);
+                        return true;
+                    }
+                }
+        );
+        return true;
+    }
+
+    private void updateItemsWithQuery(String query) {
+        List<TodoItem> newItems = todosDatabaseHelper.searchTodos(query);
+        items.clear();
+        items.addAll(newItems);
+        itemsAdapter.notifyDataSetChanged();
     }
 
     private void setupListViewListener() {
@@ -118,6 +159,12 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(TAG_TODOS_REPO, "Error updating a todo: " + newTodoItem, e);
                     Toast.makeText(this, "Error updating the todo: " + e.getLocalizedMessage(),
                             Toast.LENGTH_LONG);
+                }
+                if (!lastQuery.isEmpty()) {
+                    // If there is a last query, the user is searching with query. Since the item's
+                    // text is changed, it may not be in the list any more, so we need to update
+                    // items again.
+                    updateItemsWithQuery(lastQuery);
                 }
             }
         }

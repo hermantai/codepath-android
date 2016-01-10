@@ -88,9 +88,6 @@ public class TodosDatabaseHelper extends SQLiteOpenHelper {
             updatedTime.setTimeInMillis(now);
             TodoItem todoItem = new TodoItem(id, createdTime, updatedTime, text);
             return todoItem;
-//            Log.e(LOG_TAG, "Error saving a todo: " + text, e);
-//            Toast.makeText(context, "Error saving the todo: " + e.getLocalizedMessage(),
-//                    Toast.LENGTH_LONG);
         } finally {
             db.endTransaction();
         }
@@ -161,5 +158,46 @@ public class TodosDatabaseHelper extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
+    }
+
+    public List<TodoItem> searchTodos(String newText) {
+        List<TodoItem> todos = new ArrayList<>();
+
+        String TODO_SELECT_QUERY = String.format(
+                "SELECT * FROM %s WHERE text like ? escape '\\'", TABLE_TODO);
+        SQLiteDatabase db = getReadableDatabase();
+        String query = newText.replaceAll("%", "\\\\%").replaceAll("_", "\\\\_");
+        Cursor cursor = db.rawQuery(TODO_SELECT_QUERY, new String[]{"%" + query + "%"});
+
+        try {
+            if (cursor.moveToFirst()) {
+                do {
+                    String id = cursor.getString(cursor.getColumnIndex(COL_TODO_ID));
+                    String text = cursor.getString(cursor.getColumnIndex(COL_TODO_TEXT));
+
+                    GregorianCalendar createdTime = new GregorianCalendar();
+                    createdTime.setTimeInMillis(
+                            cursor.getLong(cursor.getColumnIndex(COL_TODO_CREATED_TIME)));
+
+                    GregorianCalendar updatedTime = new GregorianCalendar();
+                    updatedTime.setTimeInMillis(
+                            cursor.getLong(cursor.getColumnIndex(COL_TODO_UPDATED_TIME)));
+
+                    TodoItem todoItem = new TodoItem(
+                            id,
+                            createdTime,
+                            updatedTime,
+                            text
+                    );
+                    todos.add(todoItem);
+                } while(cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+
+        return todos;
     }
 }
