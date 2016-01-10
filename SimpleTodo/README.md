@@ -23,7 +23,7 @@ The following **required** functionality is completed:
 Here's a walkthrough of implemented user stories:
 
 ![video walkthrough for the required functionalities
-completed](simpletodo.gif)
+completed](simpletodo-with-created-time.gif)
 
 GIF created with LiceCap.
 
