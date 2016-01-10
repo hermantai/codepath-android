@@ -1,7 +1,7 @@
 package com.htaihm.simpletodo;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -20,14 +19,10 @@ import com.htaihm.simpletodo.repo.TodosDatabaseHelper;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
-    public static final String EDIT_EXTRA_TEXT = "item_text";
-    public static final String EDIT_EXTRA_POS = "item_pos";
-    public static final int EDIT_REQUEST_CODE = 20;
-
+public class MainActivity extends AppCompatActivity implements EditItemDialog.ItemAddedListener,
+        EditItemDialog.ItemEditedListener {
     private static final String TAG_TODOS_REPO = "TodosDatabaseRepoError";
 
     private ArrayList<TodoItem> items;
@@ -51,6 +46,20 @@ public class MainActivity extends AppCompatActivity {
                 android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemsAdapter);
         setupListViewListener();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_new_todo:
+                FragmentManager fm = getSupportFragmentManager();
+                EditItemDialog addItemDialog = EditItemDialog.newInstanceForNewItem();
+                addItemDialog.show(fm, "fragment_save_item");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 
     @Override
@@ -100,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.e(TAG_TODOS_REPO, "Error deleting a todo: " + id, e);
                             Toast.makeText(MainActivity.this,
                                     "Error deleting the todo: " + e.getLocalizedMessage(),
-                                    Toast.LENGTH_LONG);
+                                    Toast.LENGTH_LONG).show();
                         }
                         return true;
                     }
@@ -110,64 +119,13 @@ public class MainActivity extends AppCompatActivity {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                        // start the EditItemActivity
-                        Intent i = new Intent(MainActivity.this, EditItemActivity.class);
-                        i.putExtra(EDIT_EXTRA_TEXT, items.get(pos).getText());
-                        i.putExtra(EDIT_EXTRA_POS, pos);
-
-                        startActivityForResult(i, EDIT_REQUEST_CODE);
+                        FragmentManager fm = getSupportFragmentManager();
+                        EditItemDialog addItemDialog = EditItemDialog.newInstanceForEditItem(
+                                items.get(pos), pos);
+                        addItemDialog.show(fm, "fragment_save_item");
                     }
                 }
         );
-    }
-
-    public void onAddItem(View view) {
-        EditText etNewItem = (EditText) findViewById(R.id.etNewItem);
-        String itemText = etNewItem.getText().toString();
-        try {
-            TodoItem todoItem = todosDatabaseHelper.addTodo(itemText);
-            itemsAdapter.add(todoItem);
-            etNewItem.setText("");
-        } catch (SQLException e) {
-            Log.e(TAG_TODOS_REPO, "Error saving a todo: " + itemText, e);
-            Toast.makeText(this, "Error saving the todo: " + e.getLocalizedMessage(),
-                    Toast.LENGTH_LONG);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == EDIT_REQUEST_CODE) {
-            String itemText = data.getStringExtra(MainActivity.EDIT_EXTRA_TEXT);
-            int pos = data.getIntExtra(MainActivity.EDIT_EXTRA_POS, -1);
-
-            if (pos != -1) {
-                TodoItem oldTodoItem = items.get(pos);
-                GregorianCalendar updatedTime = new GregorianCalendar();
-                updatedTime.setTimeInMillis(System.currentTimeMillis());
-                TodoItem newTodoItem = new TodoItem(
-                        oldTodoItem.getId(),
-                        oldTodoItem.getCreatedTime(),
-                        updatedTime,
-                        itemText
-                );
-                try {
-                    todosDatabaseHelper.updateTodo(newTodoItem);
-                    items.set(pos, newTodoItem);
-                    itemsAdapter.notifyDataSetChanged();
-                } catch (SQLException e) {
-                    Log.e(TAG_TODOS_REPO, "Error updating a todo: " + newTodoItem, e);
-                    Toast.makeText(this, "Error updating the todo: " + e.getLocalizedMessage(),
-                            Toast.LENGTH_LONG);
-                }
-                if (!lastQuery.isEmpty()) {
-                    // If there is a last query, the user is searching with query. Since the item's
-                    // text is changed, it may not be in the list any more, so we need to update
-                    // items again.
-                    updateItemsWithQuery(lastQuery);
-                }
-            }
-        }
     }
 
     private void readItems() {
@@ -176,8 +134,26 @@ public class MainActivity extends AppCompatActivity {
         } catch (SQLException e) {
             Log.e(TAG_TODOS_REPO, "Error while trying to get todos from database", e);
             Toast.makeText(this, "Error getting todos: " + e.getLocalizedMessage(),
-                    Toast.LENGTH_LONG);
+                    Toast.LENGTH_LONG).show();
             items = new ArrayList<>();
+        }
+    }
+
+    @Override
+    public void onItemAdded(TodoItem todoItem) {
+        itemsAdapter.add(todoItem);
+    }
+
+    @Override
+    public void onItemEdited(TodoItem todoItem, int position) {
+        items.set(position, todoItem);
+        itemsAdapter.notifyDataSetChanged();
+
+        if (!lastQuery.isEmpty()) {
+            // If there is a last query, the user is searching with query. Since the item's
+            // text is changed, it may not be in the list any more, so we need to update
+            // items again.
+            updateItemsWithQuery(lastQuery);
         }
     }
 }

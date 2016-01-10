@@ -1,9 +1,10 @@
 package com.htaihm.simpletodo.repo;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 
-public class TodoItem {
+public class TodoItem implements Serializable {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     private final String id;

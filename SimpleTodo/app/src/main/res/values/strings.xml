@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">SimpleTodo</string>
-    <string name="new_item_text_label">Enter a new item</string>
+    <string name="item_text_label">Item</string>
     <string name="search">Search</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="new_todo">New Todo</string>
+    <string name="save_item">Save</string>
 </resources>

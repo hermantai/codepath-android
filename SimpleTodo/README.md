@@ -22,13 +22,15 @@ The following optional features are implemented:
 
 * [x] Persist the todo items into SQLite instead of a text file
 * [x] Filter the todo items by a search query
+* [x] Use a DialogFragment to add new items
+* [x] Use a DialogFragment instead of new Activity for editing items
 
 # Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
 
 ![video walkthrough for the required functionalities
-completed](simpletodo-with-search.gif)
+completed](simpletodo.gif)
 
 GIF created with LiceCap.
 
