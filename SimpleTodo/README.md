@@ -20,10 +20,13 @@ The following **required** functionality is completed:
 
 The following optional features are implemented:
 
-* [x] Persist the todo items into SQLite instead of a text file
 * [x] Filter the todo items by a search query
+* [x] Persist the todo items into SQLite instead of a text file
+* [x] Improve style of the todo items in the list using a custom adapter
 * [x] Use a DialogFragment to add new items
 * [x] Use a DialogFragment instead of new Activity for editing items
+* [x] Add support for selecting the priority of each todo item (and display in
+  listview item)
 
 # Video Walkthrough
 

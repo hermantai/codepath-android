@@ -10,14 +10,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Keep the Todo items in a SQLite Datbase
  */
 public class TodosDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "todosDatabase";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Table Names
     private static final String TABLE_TODO = "todo";
@@ -28,7 +27,7 @@ public class TodosDatabaseHelper extends SQLiteOpenHelper {
     private static final String COL_TODO_CREATED_TIME = "created_time";
     private static final String COL_TODO_UPDATED_TIME = "updated_time";
     private static final String COL_TODO_TEXT = "text";
-
+    private static final String COL_TODO_PRIORITY = "priority";
 
     private static TodosDatabaseHelper instance;
 
@@ -46,12 +45,14 @@ public class TodosDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_TODO_TABLE = String.format(
-                "CREATE TABLE %s(%s STRING PRIMARY KEY, %s INTEGER, %s INTEGER, %s STRING)",
+                "CREATE TABLE %s(%s STRING PRIMARY KEY," +
+                        " %s INTEGER, %s INTEGER, %s STRING, %s STRING)",
                 TABLE_TODO,
                 COL_TODO_ID,
                 COL_TODO_CREATED_TIME,
                 COL_TODO_UPDATED_TIME,
-                COL_TODO_TEXT);
+                COL_TODO_TEXT,
+                COL_TODO_PRIORITY);
 
         db.execSQL(CREATE_TODO_TABLE);
     }
@@ -64,30 +65,20 @@ public class TodosDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public TodoItem addTodo(String text) throws SQLException{
+    public void addTodo(TodoItem todoItem) throws SQLException{
         SQLiteDatabase db = getWritableDatabase();
 
         db.beginTransaction();
         try {
-            String id = UUID.randomUUID().toString();
-            long now = System.currentTimeMillis();
-
             ContentValues cv = new ContentValues();
-            cv.put(COL_TODO_ID, id);
-            cv.put(COL_TODO_CREATED_TIME, now);
-            cv.put(COL_TODO_UPDATED_TIME, now);
-            cv.put(COL_TODO_TEXT, text);
+            cv.put(COL_TODO_ID, todoItem.getId());
+            cv.put(COL_TODO_CREATED_TIME, todoItem.getCreatedTime().getTimeInMillis());
+            cv.put(COL_TODO_UPDATED_TIME, todoItem.getUpdatedTime().getTimeInMillis());
+            cv.put(COL_TODO_TEXT, todoItem.getText());
+            cv.put(COL_TODO_PRIORITY, todoItem.getPriority().toString());
 
             db.insertOrThrow(TABLE_TODO, null, cv);
             db.setTransactionSuccessful();
-
-            GregorianCalendar createdTime = new GregorianCalendar();
-            createdTime.setTimeInMillis(now);
-
-            GregorianCalendar updatedTime = new GregorianCalendar();
-            updatedTime.setTimeInMillis(now);
-            TodoItem todoItem = new TodoItem(id, createdTime, updatedTime, text);
-            return todoItem;
         } finally {
             db.endTransaction();
         }
@@ -114,11 +105,15 @@ public class TodosDatabaseHelper extends SQLiteOpenHelper {
                     updatedTime.setTimeInMillis(
                             cursor.getLong(cursor.getColumnIndex(COL_TODO_UPDATED_TIME)));
 
+                    TodoItem.Priority priority = TodoItem.Priority.valueOf(
+                            cursor.getString(cursor.getColumnIndex(COL_TODO_PRIORITY)));
+
                     TodoItem todoItem = new TodoItem(
                             id,
                             createdTime,
                             updatedTime,
-                            text
+                            text,
+                            priority
                     );
                     todos.add(todoItem);
                 } while(cursor.moveToNext());
@@ -183,11 +178,15 @@ public class TodosDatabaseHelper extends SQLiteOpenHelper {
                     updatedTime.setTimeInMillis(
                             cursor.getLong(cursor.getColumnIndex(COL_TODO_UPDATED_TIME)));
 
+                    TodoItem.Priority priority = TodoItem.Priority.valueOf(
+                            cursor.getString(cursor.getColumnIndex(COL_TODO_PRIORITY)));
+
                     TodoItem todoItem = new TodoItem(
                             id,
                             createdTime,
                             updatedTime,
-                            text
+                            text,
+                            priority
                     );
                     todos.add(todoItem);
                 } while(cursor.moveToNext());
