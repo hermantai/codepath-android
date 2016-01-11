@@ -26,24 +26,22 @@ public class TodoItemView extends RelativeLayout {
 
     public TodoItemView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
-        inflateChildren(context);
     }
 
     public TodoItemView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    private void inflateChildren(Context context) {
-        LayoutInflater.from(context).inflate(R.layout.list_item_todo_child, this, true);
-        tvItemTextDisplay = (TextView) findViewById(R.id.tvItemTextDisplay);
-        tvItemPriorityDisplay = (TextView) findViewById(R.id.tvItemPriorityDisplay);
-        tvItemCreatedTimeDisplay = (TextView) findViewById(R.id.tvItemCreatedTimeDisplay);
-    }
-
     public static TodoItemView inflate(ViewGroup parent) {
-        return (TodoItemView) LayoutInflater.from(
+        TodoItemView itemView = (TodoItemView) LayoutInflater.from(
                 parent.getContext()).inflate(R.layout.list_item_todo, parent, false);
+        itemView.tvItemTextDisplay = (TextView) itemView.findViewById(R.id.tvItemTextDisplay);
+        itemView.tvItemPriorityDisplay = (TextView) itemView.findViewById(
+                R.id.tvItemPriorityDisplay);
+        itemView.tvItemCreatedTimeDisplay = (TextView) itemView.findViewById(
+                R.id.tvItemCreatedTimeDisplay);
+
+        return itemView;
     }
 
     public void setItem(TodoItem todoItem) {
