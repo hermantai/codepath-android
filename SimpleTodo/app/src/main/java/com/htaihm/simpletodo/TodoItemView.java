@@ -15,7 +15,9 @@ import com.htaihm.simpletodo.repo.TodoItem;
 import java.text.SimpleDateFormat;
 
 /**
- * A {@link View} that displays a TodoItem inside a {@link ListView}
+ * A {@link View} that displays a TodoItem inside a {@link ListView}. The idea comes from
+ * <a href="https://www.bignerdranch.com/blog/customizing-android-listview-rows-subclassing/">
+ * Customizing Android ListView Rows by Subclassing</a>
  */
 public class TodoItemView extends RelativeLayout {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
