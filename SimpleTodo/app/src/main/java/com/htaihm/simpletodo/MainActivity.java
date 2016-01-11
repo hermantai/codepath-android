@@ -42,8 +42,7 @@ public class MainActivity extends AppCompatActivity implements EditItemDialog.It
 
         lvItems = (ListView)findViewById(R.id.lvItems);
         readItems();
-        itemsAdapter = new TodoItemsAdapter(this,
-                R.layout.list_item_todo, items);
+        itemsAdapter = new TodoItemsAdapter(this, items);
         lvItems.setAdapter(itemsAdapter);
         setupListViewListener();
     }
@@ -90,9 +89,8 @@ public class MainActivity extends AppCompatActivity implements EditItemDialog.It
 
     private void updateItemsWithQuery(String query) {
         List<TodoItem> newItems = todosDatabaseHelper.searchTodos(query);
-        items.clear();
-        items.addAll(newItems);
-        itemsAdapter.notifyDataSetChanged();
+        itemsAdapter.clear();
+        itemsAdapter.addAll(newItems);
     }
 
     private void setupListViewListener() {
